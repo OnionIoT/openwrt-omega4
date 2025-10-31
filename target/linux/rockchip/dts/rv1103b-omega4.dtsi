@@ -156,14 +156,6 @@
 	status = "okay";
 };
 
-&uart0 {
- 	status = "okay";
-};
-
-&uart1 {
-	status = "okay";
-};
-
 &u2phy {
 	status = "okay";
 };
@@ -181,8 +173,6 @@
 	extcon = <&u2phy>;
 	status = "okay";
 };
-
-
 
 /* Omega4 module specific HW use */
 
