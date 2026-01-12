@@ -1,0 +1,28 @@
+From 0f8d6f6b5d3b7b4f2f1f0c7b8a9d3a5c6e7f8a9b Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Sun, 12 Jan 2025 10:20:00 +0000
+Subject: [PATCH] rockchip: rkisp1: add OOT helper to select vb2-dma-contig
+
+Add a helper Kconfig symbol used by the out-of-tree rkisp1 driver to
+pull in vb2-dma-contig without enabling the in-tree driver.
+---
+ drivers/media/platform/rockchip/rkisp1/Kconfig | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/drivers/media/platform/rockchip/rkisp1/Kconfig b/drivers/media/platform/rockchip/rkisp1/Kconfig
+index 7f8a0b1a2f3b..4c9a2d3e5f6a 100644
+--- a/drivers/media/platform/rockchip/rkisp1/Kconfig
++++ b/drivers/media/platform/rockchip/rkisp1/Kconfig
+@@ -15,3 +15,12 @@ config VIDEO_ROCKCHIP_ISP1
+ 
+ 	  To compile this driver as a module, choose M here: the module
+ 	  will be called rockchip-isp1.
++
++config VIDEO_ROCKCHIP_ISP1_OOT
++	bool "Rockchip ISP1 out-of-tree helper"
++	depends on ARCH_ROCKCHIP || COMPILE_TEST
++	select VIDEOBUF2_DMA_CONTIG
++	default n
++	help
++	  Helper symbol for the out-of-tree rkisp1 driver to pull in
++	  vb2-dma-contig support without enabling the in-tree driver.

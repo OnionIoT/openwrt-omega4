@@ -1,0 +1,155 @@
+From 3c4e5f6a7b8c9d0e1f2a3b4c5d6e7f8012345678 Mon Sep 17 00:00:00 2001
+From: Codex <codex@openai.com>
+Date: Sun, 12 Jan 2025 11:10:00 +0000
+Subject: [PATCH] media: v4l2: add OOT async/fwnode helper APIs
+
+Add helper APIs used by out-of-tree Rockchip camera drivers:
+- v4l2_async_notifier_clr_unready_dev()
+- v4l2_async_nf_parse_fwnode_endpoints()
+---
+ drivers/media/v4l2-core/v4l2-async.c  | 17 +++++++++++++++++
+ drivers/media/v4l2-core/v4l2-fwnode.c | 46 +++++++++++++++++++++++++++++++++++
+ include/media/v4l2-async.h            |  2 ++
+ include/media/v4l2-fwnode.h           |  9 +++++++
+ 4 files changed, 74 insertions(+)
+
+diff --git a/drivers/media/v4l2-core/v4l2-async.c b/drivers/media/v4l2-core/v4l2-async.c
+index 7b8ccf3a2b9e..4d47d0a5c8b1 100644
+--- a/drivers/media/v4l2-core/v4l2-async.c
++++ b/drivers/media/v4l2-core/v4l2-async.c
+@@ -634,6 +634,23 @@ int v4l2_async_nf_register(struct v4l2_async_notifier *notifier)
+ }
+ EXPORT_SYMBOL(v4l2_async_nf_register);
+ 
++int v4l2_async_notifier_clr_unready_dev(struct v4l2_async_notifier *notifier)
++{
++	int ret;
++
++	if (!notifier)
++		return -EINVAL;
++
++	mutex_lock(&list_lock);
++	ret = v4l2_async_nf_try_all_subdevs(notifier);
++	if (!ret)
++		ret = v4l2_async_nf_try_complete(notifier);
++	mutex_unlock(&list_lock);
++
++	return ret;
++}
++EXPORT_SYMBOL_GPL(v4l2_async_notifier_clr_unready_dev);
++
+ static void
+ __v4l2_async_nf_unregister(struct v4l2_async_notifier *notifier)
+ {
+diff --git a/drivers/media/v4l2-core/v4l2-fwnode.c b/drivers/media/v4l2-core/v4l2-fwnode.c
+index 5e6a4b0f0e73..4aa01d7c3c2a 100644
+--- a/drivers/media/v4l2-core/v4l2-fwnode.c
++++ b/drivers/media/v4l2-core/v4l2-fwnode.c
+@@ -1120,6 +1120,52 @@ v4l2_fwnode_reference_parse_int_props(struct device *dev,
+ }
+ EXPORT_SYMBOL_GPL(v4l2_fwnode_reference_parse_int_props);
+ 
++int v4l2_async_nf_parse_fwnode_endpoints(
++	struct device *dev, struct v4l2_async_notifier *notifier,
++	unsigned int asd_struct_size,
++	int (*parse_endpoint)(struct device *dev,
++			      struct v4l2_fwnode_endpoint *vep,
++			      struct v4l2_async_connection *asc))
++{
++	struct fwnode_handle *ep = NULL;
++	struct fwnode_handle *fwnode = dev_fwnode(dev);
++	int ret = 0;
++
++	if (!fwnode)
++		return -ENODEV;
++
++	while ((ep = fwnode_graph_get_next_endpoint(fwnode, ep))) {
++		struct v4l2_fwnode_endpoint vep = {
++			.bus_type = V4L2_MBUS_UNKNOWN,
++		};
++		struct v4l2_async_connection *asc;
++
++		ret = v4l2_fwnode_endpoint_alloc_parse(ep, &vep);
++		if (ret)
++			goto err_put_endpoint;
++
++		asc = __v4l2_async_nf_add_fwnode_remote(notifier, ep,
++							asd_struct_size);
++		if (IS_ERR(asc)) {
++			ret = PTR_ERR(asc);
++			v4l2_fwnode_endpoint_free(&vep);
++			if (ret == -EEXIST || ret == -ENOTCONN) {
++				ret = 0;
++				continue;
++			}
++			goto err_put_endpoint;
++		}
++
++		if (parse_endpoint) {
++			ret = parse_endpoint(dev, &vep, asc);
++			if (ret) {
++				v4l2_fwnode_endpoint_free(&vep);
++				goto err_put_endpoint;
++			}
++		}
++
++		v4l2_fwnode_endpoint_free(&vep);
++	}
++
++	return 0;
++
++err_put_endpoint:
++	fwnode_handle_put(ep);
++	return ret;
++}
++EXPORT_SYMBOL_GPL(v4l2_async_nf_parse_fwnode_endpoints);
++
+ /**
+  * v4l2_async_nf_parse_fwnode_sensor - parse common references on
+  *					     sensors for async sub-devices
+diff --git a/include/media/v4l2-async.h b/include/media/v4l2-async.h
+index 603211c2cab1..0af171a15a4b 100644
+--- a/include/media/v4l2-async.h
++++ b/include/media/v4l2-async.h
+@@ -279,6 +279,8 @@ struct v4l2_async_connection *
+ v4l2_async_nf_register(struct v4l2_async_notifier *notifier);
+ 
+ /**
++ * v4l2_async_notifier_clr_unready_dev - retry async bindings for a notifier
++ * @notifier: pointer to &struct v4l2_async_notifier
++ */
++int v4l2_async_notifier_clr_unready_dev(struct v4l2_async_notifier *notifier);
++
++/**
+  * v4l2_async_nf_unregister - unregisters a subdevice
+  *	asynchronous notifier
+  *
+diff --git a/include/media/v4l2-fwnode.h b/include/media/v4l2-fwnode.h
+index e1c5741fbbfa..f0b5b1c829a6 100644
+--- a/include/media/v4l2-fwnode.h
++++ b/include/media/v4l2-fwnode.h
+@@ -16,6 +16,11 @@
+ #include <linux/list.h>
+ #include <linux/types.h>
+ 
++struct device;
++struct v4l2_async_notifier;
++struct v4l2_async_connection;
++
+ #include <media/v4l2-mediabus.h>
+ 
+ /**
+@@ -199,6 +204,10 @@ enum v4l2_fwnode_bus_type {
+ 	NR_OF_V4L2_FWNODE_BUS_TYPE
+ };
+ 
++int v4l2_async_nf_parse_fwnode_endpoints(
++	struct device *dev, struct v4l2_async_notifier *notifier,
++	unsigned int asd_struct_size,
++	int (*parse_endpoint)(struct device *dev,
++			      struct v4l2_fwnode_endpoint *vep,
++			      struct v4l2_async_connection *asc));
++
+ /**
+  * v4l2_fwnode_endpoint_parse() - parse all fwnode node properties
+  * @fwnode: pointer to the endpoint's fwnode handle

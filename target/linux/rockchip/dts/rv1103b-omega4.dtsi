@@ -227,6 +227,8 @@
 
 	// mmc-pwrseq = <&sdio_pwrseq>;
 	// vmmc-supply = <&vcc3v3_sd>;
+	// rockchip,default-sample-phase = <270>;
+
 
 	pinctrl-names = "default";
 	pinctrl-0 = <&sdmmc1_cmd_pins &sdmmc1_clk_pins &sdmmc1_bus4_pins>;
