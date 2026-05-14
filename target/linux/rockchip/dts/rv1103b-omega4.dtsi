@@ -304,9 +304,13 @@
 	status = "okay";
 };
 
-// UART2 previously routed to BT; no longer used when BT runs over SDIO
+// UART2 is enabled for manufacturing access to AIC UART. Do not claim the pins
+// at boot: SPI0 uses the same GPIO2_B0/B1 mux group on the EVB. Manufacturing
+// tools temporarily switch the pinmux at runtime when UART2 is needed.
 &uart2 {
-	status = "disabled";
+	/delete-property/ pinctrl-names;
+	/delete-property/ pinctrl-0;
+	status = "okay";
 };
 
 // FSPI0 (aliased as SPI1) is connected to on-board W25N02KVZEIR QSPI NAND flash
