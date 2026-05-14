@@ -87,7 +87,6 @@
 		dovdd-supply = <&vcc_cam_dovdd>;
 		dvdd-supply = <&vcc_cam_dvdd>;
 		reset-gpios = <&gpio2 RK_PB3 GPIO_ACTIVE_HIGH>;
-		pwdn-gpios = <&gpio2 RK_PB0 GPIO_ACTIVE_HIGH>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&cam_clk0_pins>;
 		rockchip,camera-module-index = <0>;
