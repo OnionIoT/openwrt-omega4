@@ -116,6 +116,7 @@ CONFIG_PACKAGE_libreadline=y
 CONFIG_PACKAGE_libstdcpp=y
 CONFIG_PACKAGE_libudev-zero=y
 CONFIG_PACKAGE_libv4l=y
+CONFIG_PACKAGE_mfg-test-tools=y
 CONFIG_PACKAGE_omega4-pinmux=y
 CONFIG_PACKAGE_openssh-keygen=y
 CONFIG_PACKAGE_openssh-server=y
