@@ -112,6 +112,7 @@ CONFIG_PACKAGE_librockchip-mpp=y
 CONFIG_PACKAGE_omega4-vencd=y
 CONFIG_PACKAGE_rockchip-mpp-tools=y
 CONFIG_PACKAGE_rockchip-aiq=y
+CONFIG_PACKAGE_rockchip-rknn=y
 CONFIG_PACKAGE_libatomic=y
 CONFIG_PACKAGE_libattr=y
 CONFIG_PACKAGE_libcbor=y
