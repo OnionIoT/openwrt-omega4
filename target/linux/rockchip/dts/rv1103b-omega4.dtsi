@@ -117,29 +117,23 @@
 	};
 
 	vdd_logic: vdd-logic {
-		compatible = "pwm-regulator";
-		pwms = <&pwm0_4ch_3 0 5000 1>;
+		compatible = "regulator-fixed";
 		regulator-name = "vdd_logic";
-		regulator-min-microvolt = <810000>;
-		regulator-max-microvolt = <1006000>;
-		regulator-init-microvolt = <900000>;
+		regulator-min-microvolt = <900000>;
+		regulator-max-microvolt = <900000>;
 		regulator-always-on;
 		regulator-boot-on;
-		regulator-settling-time-up-us = <250>;
-		pwm-supply = <&vcc_sys>;
+		vin-supply = <&vcc_sys>;
 	};
 
 	vdd_npu: vdd_arm: vdd-arm {
-		compatible = "pwm-regulator";
-		pwms = <&pwm0_4ch_0 0 5000 1>;
+		compatible = "regulator-fixed";
 		regulator-name = "vdd_arm";
-		regulator-min-microvolt = <717000>;
-		regulator-max-microvolt = <1102000>;
-		regulator-init-microvolt = <950000>;
+		regulator-min-microvolt = <950000>;
+		regulator-max-microvolt = <950000>;
 		regulator-always-on;
 		regulator-boot-on;
-		regulator-settling-time-up-us = <250>;
-		pwm-supply = <&vcc_sys>;
+		vin-supply = <&vcc_sys>;
 	};
 
 	/* Omega4 module: Wi-Fi/BT (AIC8800 SDIO) */
@@ -197,11 +191,11 @@
 };
 
 &pwm0_4ch_0 {
-	status = "okay";
+	status = "disabled";
 };
 
 &pwm0_4ch_3 {
-	status = "okay";
+	status = "disabled";
 };
 
 &rga2 {
