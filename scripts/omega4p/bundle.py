@@ -49,12 +49,14 @@ def main():
                 parser.error("Boot package has the wrong board identity")
             if info["ddr"] != {"version": "1.07", "configured_mhz": 667, "uart_baud": 115200}:
                 parser.error("Boot package has an unexpected DDR configuration")
-            hashes = {name: info["images"][name]["sha256"] for name in SDK_HASHES}
+            hashes = {name: info["images"][name]["sha256"] for name in (*SDK_HASHES, "env.img")}
         except (OSError, ValueError, KeyError, TypeError) as error:
             parser.error(f"Invalid omega4p-boot provenance: {error}")
-    files = {name: boot_dir / name for name in SDK_HASHES}
+    files = {name: boot_dir / name for name in (*SDK_HASHES, "env.img")}
     files.update({name: args.images / (PREFIX + name)
                   for name in ("env.img", "boot.img", "rootfs.img", "sysupgrade.tar")})
+    if args.boot_dir:
+        files["env.img"] = boot_dir / "env.img"
     # Validate every input before creating the output directory.
     for name, path in files.items():
         if not path.is_file() or not path.stat().st_size:

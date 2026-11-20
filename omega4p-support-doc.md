@@ -166,3 +166,13 @@ Wi-Fi scan returned seven APs. The earlier no-carrier limitation is superseded
 by this result. Camera/audio remain unvalidated. A UBI timeout occurred before
 the bootloader update and did not recur during these tests; it is not considered
 a diagnosed/fixed issue. See `hardware-validation/omega4p-boot/REPORT.md`.
+
+## Boot-package environment ownership (20 November 2026)
+
+`omega4p-boot` and `omega4-boot` now produce env.img alongside loader, IDBlock
+and U-Boot, with hashes and environment source provenance. Board image recipes
+copy the package artifact from BIN_DIR; the package's files/uboot.env is the
+authoritative source. The Omega4+ bundler takes env.img from --boot-dir and
+checks its recorded hash. Pinned SDK bundles retain the OpenWrt image fallback.
+Both generated environments exactly match the prior v0.0.15 release bytes.
+USB initial provisioning must include env.img; normal sysupgrade preserves it.

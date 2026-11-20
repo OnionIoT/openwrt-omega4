@@ -5,12 +5,12 @@
 ### env.img generate scripts ###
 define Build/env-rv1103b-nand-img
 	if [ ! -d $(STAGING_DIR_IMAGE) ]; then mkdir -p $(STAGING_DIR_IMAGE) ; fi
-	mkenvimage -s 0x40000 -p 0x0 -o $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-env.img ./rv1103b-uboot.env.spi-nand.txt
+	$(CP) $(BIN_DIR)/omega4-boot/env.img $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-env.img
 endef
 
 define Build/env-omega4p-nand-img
 	mkdir -p $(STAGING_DIR_IMAGE)
-	mkenvimage -s 0x40000 -p 0x0 -o $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-env.img ./omega4p-uboot.env.spi-nand.txt
+	$(CP) $(BIN_DIR)/omega4p-boot/env.img $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-env.img
 endef
 
 define Build/env-rv1106-sd-img
