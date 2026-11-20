@@ -20,6 +20,7 @@ rockchip_setup_macs()
 	local label_mac=""
 
 	case "$board" in
+	onion,rv1106b-omega4p-evb|\
 	onion,rv1103b-omega4-evb)
 		lan_mac=$(mtd_get_mac_ascii env ethaddr)
 		;;

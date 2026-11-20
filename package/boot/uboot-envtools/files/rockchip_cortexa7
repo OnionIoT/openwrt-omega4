@@ -11,7 +11,8 @@ touch /etc/config/ubootenv
 board=$(board_name)
 
 case "$board" in
-onion,rv1103b-omega4-evb)
+onion,rv1103b-omega4-evb|\
+onion,rv1106b-omega4p-evb)
 	idx="$(find_mtd_index env)"
 	[ -n "$idx" ] && ubootenv_add_uci_config "/dev/mtd$idx" "0x0" "0x40000" "0x20000"
 	;;

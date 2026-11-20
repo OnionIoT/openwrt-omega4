@@ -8,6 +8,11 @@ define Build/env-rv1103b-nand-img
 	mkenvimage -s 0x40000 -p 0x0 -o $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-env.img ./rv1103b-uboot.env.spi-nand.txt
 endef
 
+define Build/env-omega4p-nand-img
+	mkdir -p $(STAGING_DIR_IMAGE)
+	mkenvimage -s 0x40000 -p 0x0 -o $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-env.img ./omega4p-uboot.env.spi-nand.txt
+endef
+
 define Build/env-rv1106-sd-img
 	if [ ! -d $(STAGING_DIR_IMAGE) ]; then mkdir -p $(STAGING_DIR_IMAGE) ; fi
 	mkenvimage -s 0x8000 -p 0x0 -o $(STAGING_DIR_IMAGE)/$(UBOOT_DEVICE_NAME)-env.img ./rv1106-uboot.env.sd.txt
@@ -156,3 +161,34 @@ define Device/luckfox_pico
   IMAGE/sysupgrade.img.gz := env-sd-img | rockchip32-legacy-bin | append-rootfs | pad-extra 128k | gzip | append-metadata
 endef
 TARGET_DEVICES += luckfox_pico
+
+# RV1106B external DDR3; requires the Omega4+ DDR667/UART115200 loader.
+define Device/onion_omega4p-evb
+  $(Device/Default-nandflash)
+  DEVICE_VENDOR := Onion
+  DEVICE_MODEL := Omega4+ EVB
+  SUPPORTED_DEVICES := onion,rv1106b-omega4p-evb
+  BOARD_NAME := onion,rv1106b-omega4p-evb
+  SOC := rv1106b
+  DEVICE_DTS := rv1106b-omega4p-evb
+  UBOOT_DEVICE_NAME := rv1106b-omega4p-nand
+  DEVICE_PACKAGES := kmod-rknpu-rockchip
+  IMAGE_SIZE := 235520k
+  KERNEL_SIZE := 6144k
+  KERNEL := kernel-bin | boot-omega4p-bin
+  IMAGE/boot.img := append-kernel
+  IMAGE/env.img := env-omega4p-nand-img | rockchip-env-img
+  IMAGES += sysupgrade.tar
+  IMAGE/sysupgrade.tar := sysupgrade-tar | append-metadata
+endef
+TARGET_DEVICES += onion_omega4p-evb
+
+# SPL boots this FIT directly: use real load addresses, not U-Boot sentinels.
+define Build/boot-omega4p-bin
+	rm -rf $@.boot
+	mkdir -p $@.boot
+	$(CP) ./boot-omega4p.its $@.boot/boot.its
+	$(CP) $(KERNEL_BUILD_DIR)/image-$(DEVICE_DTS).dtb $@.boot/fdt
+	$(CP) $(IMAGE_KERNEL) $@.boot/kernel
+	PATH=$(LINUX_DIR)/scripts/dtc:$(PATH) mkimage -B 0x200 -E -p 0x800 -f $@.boot/boot.its $@
+endef
