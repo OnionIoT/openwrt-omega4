@@ -77,12 +77,17 @@ make -j20
 
 Outputs appear under `bin/targets/rockchip/cortexa7/` with the
 `openwrt-rockchip-cortexa7-onion_omega4p-evb` prefix: boot, environment, UBI
-rootfs and sysupgrade images. Loader binaries are supplied separately, as in
-the existing Omega4 build. To assemble a local bundle after building:
+rootfs and sysupgrade images. The local feed's `omega4p-boot` package builds
+U-Boot/SPL and packages the pinned DDR/MCU inputs, producing the three boot
+images under `omega4p-boot/`. Install the feed package before `make defconfig`;
+the Omega4+ profile selects it by default. It requires a pinned reference SDK
+Git checkout for source export (default `../../ref/1103B-SDK`), but does not
+reuse finished SDK boot images or modify that checkout. See the package's
+`omega4p-boot-doc.md`. To assemble a local bundle after building:
 
 ```sh
 python3 scripts/omega4p/bundle.py \
-  --sdk-release ../../ref/1103B-SDK/output/rv1106b-256nand-256ram-ddr667-v107-uart115200 \
+  --boot-dir bin/targets/rockchip/cortexa7/omega4p-boot \
   --images bin/targets/rockchip/cortexa7 \
   --output bin/targets/rockchip/cortexa7/omega4p-bundle
 ```
@@ -90,6 +95,9 @@ python3 scripts/omega4p/bundle.py \
 The helper verifies inputs before creating a new output directory, emits
 `SHA256SUMS` and a byte-addressed `layout.json`, and never flashes a device.
 It does not package or overwrite SDK meta; the bundle is not `update.img`.
+The original SDK release remains available through `--sdk-release` instead
+of `--boot-dir`. New package-built images require their own hardware test;
+the validation below describes the original SDK boot images.
 
 ## Hardware validation — 19 November 2026
 
@@ -147,3 +155,14 @@ Camera and audio are not validated by this bring-up. Ethernet configuration
 was not changed. Final state: DUT powered on, boot button released, both USB
 ports enabled. Detailed evidence and the flash backup are in the workspace's
 `hardware-validation/` directory.
+
+## Package-built bootloader validation — 19 November 2026
+
+The local feed's `omega4p-boot` outputs were subsequently flashed on A29C.
+New USB downloader, idblock/U-Boot readback, normal/cold boots and the rebuilt
+U-Boot console passed. Network settings and environment were preserved.
+Ethernet now had carrier: 100 Mb/s link, an address and 3/3 gateway ping replies;
+Wi-Fi scan returned seven APs. The earlier no-carrier limitation is superseded
+by this result. Camera/audio remain unvalidated. A UBI timeout occurred before
+the bootloader update and did not recur during these tests; it is not considered
+a diagnosed/fixed issue. See `hardware-validation/omega4p-boot/REPORT.md`.
