@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: GPL-2.0-only
+/dts-v1/;
+/ {
+	description = "Omega4+ Linux FIT";
+	#address-cells = <1>;
+	images {
+		fdt {
+			description = "Omega4+ device tree";
+			data = /incbin/("fdt");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "none";
+			load = <0x00c00000>;
+			hash { algo = "sha256"; };
+		};
+		kernel {
+			description = "OpenWrt Linux zImage";
+			data = /incbin/("kernel");
+			type = "kernel";
+			arch = "arm";
+			os = "linux";
+			compression = "none";
+			load = <0x02000000>;
+			entry = <0x02000000>;
+			hash { algo = "sha256"; };
+		};
+	};
+	configurations {
+		default = "conf";
+		conf {
+			description = "Boot Omega4+ Linux with FDT and no ramdisk";
+			fdt = "fdt";
+			kernel = "kernel";
+		};
+	};
+};

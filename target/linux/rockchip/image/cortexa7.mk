@@ -56,3 +56,45 @@ define Device/plan44_p44-xx-omega4-debug
   DEVICE_DTS := rv1103b-p44-base-omega4-debug
 endef
 TARGET_DEVICES += plan44_p44-xx-omega4-debug
+
+# Onion boards retain their installed NAND layout and runtime board identity.
+define Build/onion-boot-env
+	$(CP) $(BIN_DIR)/$(1)-boot/env.img $@
+endef
+
+define Build/boot-omega4p-bin
+	rm -rf $@.boot
+	mkdir -p $@.boot
+	$(CP) boot-omega4p.its $@.boot/boot.its
+	$(CP) $(KDIR)/image-$(DEVICE_DTS).dtb $@.boot/fdt
+	$(CP) $(IMAGE_KERNEL) $@.boot/kernel
+	PATH="$(LINUX_DIR)/scripts/dtc:$(PATH)" mkimage -B 0x200 -E -p 0x800 -f $@.boot/boot.its $@
+endef
+
+define Device/onion_omega4-evb
+  $(Device/omega4-common)
+  DEVICE_VENDOR := Onion
+  DEVICE_MODEL := Omega4 EVB
+  BOARD_NAME := onion,rv1103b-omega4-evb
+  SUPPORTED_DEVICES := onion,rv1103b-omega4-evb onion,onion_omega4
+  DEVICE_DTS := rv1103b-omega4-evb
+  DEVICE_PACKAGES := kmod-rknpu-rockchip
+  IMAGE/env.img := onion-boot-env omega4
+endef
+TARGET_DEVICES += onion_omega4-evb
+
+define Device/onion_omega4p-evb
+  $(Device/omega4-common)
+  DEVICE_VENDOR := Onion
+  DEVICE_MODEL := Omega4+ EVB
+  BOARD_NAME := onion,rv1106b-omega4p-evb
+  SUPPORTED_DEVICES := onion,rv1106b-omega4p-evb
+  SOC := rv1106b
+  DEVICE_DTS := rv1106b-omega4p-evb
+  DEVICE_PACKAGES := kmod-rknpu-rockchip
+  IMAGE_SIZE := 235520k
+  KERNEL_SIZE := 6144k
+  KERNEL := kernel-bin | boot-omega4p-bin | check-size 6144k
+  IMAGE/env.img := onion-boot-env omega4p
+endef
+TARGET_DEVICES += onion_omega4p-evb

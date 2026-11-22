@@ -1,0 +1,122 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2022 Rockchip Electronics Co., Ltd.
+ * Copyright (c) 2025 plan44.ch/luz
+ * Copyright (c) 2025 Onion Corporation
+ */
+
+/dts-v1/;
+
+#include "rv1103b.dtsi"
+#include "rv1103b-pinctrl.dtsi"
+#include "rv1103b-omega4.dtsi"
+#include "rv1103b-omega4-cam.dtsi"
+
+/ {
+	model = "Omega4 EVB P2";
+	compatible = "onion,rv1103b-omega4-evb", "rockchip,rv1103b";
+
+	aliases {
+		led-boot = &sys_led;
+		led-failsafe = &sys_led;
+		led-running = &sys_led;
+		led-upgrade = &sys_led;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		sys_led: sys-led {
+			gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
+			label = "sys";
+			default-state = "on";
+		};
+	};
+
+	// vcc3v3_sd: vcc3v3-sd {
+	// 	compatible = "regulator-fixed";
+	// 	regulator-name = "vcc3v3_sd";
+	// 	regulator-min-microvolt = <3300000>;
+	// 	regulator-max-microvolt = <3300000>;
+	// 	regulator-boot-on;
+	// 	regulator-always-on;
+	// 	vin-supply = <&vcc_3v3>;
+	// };
+
+};
+
+
+/**********FLASH**********/
+
+// is on the omega4 module itself, not defined here
+
+/**********SDMMC**********/
+&sdmmc0 {
+
+	status = "okay";
+};
+
+
+/**********ETH**********/
+&gmac {
+	status = "okay";
+};
+
+/**********USB**********/
+&u2phy {
+	status = "okay";
+};
+
+&u2phy_otg {
+	rockchip,vbus-always-on;
+	status = "okay";
+};
+
+&usbdrd {
+	status = "okay";
+};
+
+&usbdrd_dwc3 {
+	status = "okay";
+};
+
+/**********I2C**********/
+&i2c1 {
+	status = "okay";
+	pinctrl-0 = <&i2c1m0_xfer_pins>;
+	clock-frequency = <100000>;
+};
+
+&i2c3 {
+	status = "okay";
+	pinctrl-0 = <&i2c3m0_xfer_pins>;
+	clock-frequency = <100000>;
+};
+
+/**********SPI**********/
+&spi0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&spi0m0_clk_pins &spi0m0_cs0_pins>;
+	spidev@0 {
+		compatible = "rockchip,spidev";
+		reg = <0>;
+		spi-max-frequency = <50000000>;
+	};
+};
+
+
+
+/**********UART**********/
+
+// UART0  M0 is the system console on the O4-EVB connected to CP2104
+&uart0 {
+ 	status = "okay";
+ 	pinctrl-names = "default";
+ 	pinctrl-0 = <&uart0m0_xfer_pins>;
+};
+
+
+&rtc {
+	status = "okay";
+};

@@ -18,6 +18,8 @@ platform_check_image() {
 	omega4_check_upgrade_options || return 1
 	[ "$#" -eq 1 ] || return 1
 	case "$(board_name)" in
+	onion,rv1103b-omega4-evb|\
+	onion,rv1106b-omega4p-evb|\
 	plan44,rv1103b-p44-base-omega4)
 		nand_do_platform_check "$(board_name)" "$1"
 		;;
@@ -31,6 +33,8 @@ platform_check_image() {
 platform_do_upgrade() {
 	omega4_check_upgrade_options || return 1
 	case "$(board_name)" in
+	onion,rv1103b-omega4-evb|\
+	onion,rv1106b-omega4p-evb|\
 	plan44,rv1103b-p44-base-omega4)
 		CI_KERNPART="boot"
 		CI_ROOTPART="rootfs"

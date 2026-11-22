@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# Ensure wwan is treated as WAN and allow SSH on port 22 from that zone
+# Add wwan to the WAN zone
+uci -q add_list "wan.network=wwan"
+
+# Add SSH allow rule once
+rule="$(uci -q add firewall rule)"
+uci -q set firewall."$rule".name='Allow-SSH-WWAN'
+uci -q set firewall."$rule".src='wan'
+uci -q set firewall."$rule".proto='tcp'
+uci -q set firewall."$rule".dest_port='22'
+uci -q set firewall."$rule".target='ACCEPT'
+
+
+# Add wlan to the LAN zone
+uci -q add_list "lan.network=wlan"
+
+uci -q commit firewall
+
+exit 0
