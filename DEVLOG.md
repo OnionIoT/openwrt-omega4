@@ -104,3 +104,12 @@ Enable micbias and capture:
 Prepare release builds for both boards with version 0.0.16 and build 20261122.
 The previously validated 25.12 port is unchanged apart from release identity.
 Release notes retain hardware coverage and known limitations.
+
+- Both exact v0.0.16 release builds passed. ZIPs passed board/FIT/UBI/environment
+  and per-file hash checks. Release source: ddf4b208e550111923ed082dd1079d1bccb66407.
+- Exact release sysupgrade SHA-256
+  1e2313be199d5f10d215a73bea68c3e4e420ea19ebbadb0bf1b486085593548e
+  passed target hash and compatibility checks, then settings-preserving install
+  on A29C. Firmware reports 0.0.16 / 20261122. Full smoke passed again, including
+  9 Wi-Fi BSS entries, NPU, hardware encoding and 96 MiB memory testing.
+  Evidence: sibling releases/v0.0.16/a29c-release-uart.log.
