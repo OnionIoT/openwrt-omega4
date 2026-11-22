@@ -98,3 +98,9 @@ Enable micbias and capture:
   binaries were retained. Camera/audio, NPU DVFS and online APK updates remain
   outside the successful smoke coverage. Full evidence: sibling
   upgrade-25.12/hardware/REPORT.md. Final fixture state is powered on, boot released.
+
+## 2026-11-22 — v0.0.16 release
+
+Prepare release builds for both boards with version 0.0.16 and build 20261122.
+The previously validated 25.12 port is unchanged apart from release identity.
+Release notes retain hardware coverage and known limitations.
