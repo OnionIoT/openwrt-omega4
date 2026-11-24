@@ -243,3 +243,11 @@ hardware-validation/2026-11-24-speaker for ongoing validation.
   memory smoke and simultaneous stereo audio. No panic or idle warnings in these
   checks; network/env hashes unchanged. The HPMCU fix has causal
   limits documented (startup race strongly implicated, corrupting write not traced).
+
+## 2026-11-24 — v0.0.18 release preparation
+
+Build both boards with RV1103B audio/ALSA tools, amplifier enable, symmetric
+duplex framing and HPMCU reset-before-clocks/shutdown fixes. Firmware identity
+0.0.18 / 20261124. Validate exact Omega4+ sysupgrade on A29C; original Omega4
+hardware remains unavailable. Prior panic attribution remains an inference
+from confirmed kernel corruption and the corrected MCU startup hazard.
