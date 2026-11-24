@@ -161,3 +161,13 @@ hardware-validation/2026-11-24-camera. No release was published.
 Build both boards with camera async binding and V4L2 initialization fixes.
 Set firmware identity to 0.0.17 / 20261124. Original Omega4 hardware remains
 unavailable; qualify exact Omega4+ release capture on A29C before publication.
+
+- Both v0.0.17 board builds and bundle hash/FIT/DT/UBI/environment checks passed.
+  Source: a70fa697876758218bb9948eb7a486c128c95814; packages d925860.
+- Exact Omega4+ sysupgrade SHA256 7e37c273366b2e52adb5ddb0cf3539364993d190bffc9071895f08e8c9caa367
+  passed compatibility checking and settings-preserving installation on A29C.
+  Runtime identity is 0.0.17 / 20261124; kernel/rootfs hashes match the release.
+  Environment and network configuration hashes are unchanged. Camera modules
+  match /rom (no development overlay); two five-frame 2304x1296 NV12 capture
+  tests passed and exported image was visually checked. Ethernet ping passed.
+  Evidence: sibling releases/v0.0.17/a29c-uart.log and camera-preview.png.
