@@ -113,3 +113,51 @@ Release notes retain hardware coverage and known limitations.
   on A29C. Firmware reports 0.0.16 / 20261122. Full smoke passed again, including
   9 Wi-Fi BSS entries, NPU, hardware encoding and 96 MiB memory testing.
   Evidence: sibling releases/v0.0.16/a29c-release-uart.log.
+
+## 2026-11-24 — Update A29C to latest published release
+
+Confirmed Omega4+ identity on user-selected A29C and latest release v0.0.16.
+The installed version already reported 0.0.16, but the root filesystem hash
+differed from the published sysupgrade payload. Backed up settings/environment,
+verified the release ZIP against GitHub's asset digest, verified target download
+and sysupgrade compatibility, then performed a settings-preserving sysupgrade.
+After boot, kernel/FIT and rootfs hashes exactly match the release payloads;
+environment and network configuration hashes are unchanged. Ethernet ping
+passed at 192.168.77.156. Both mfg-aic-mac and mfg-aic-uart are installed.
+Evidence and private backups: sibling hardware-validation/2026-11-24-update.
+Final outputs: USB1 off, USB2 on, RELAY1 on, RELAY2 released.
+
+## 2026-11-24 — A29C Wi-Fi module UART access
+
+With the user's newly connected Wi-Fi UART, the installed mfg-aic-mac load
+command successfully loaded RAM test firmware over UART2 at 921600 baud:
+XMODEM 267 STX packets, zero retries, load exit 0. mfg-aic-mac show returned
+Wi-Fi 000000000000 (remain:2) and BT 000000000000 (remain:2), exit 0.
+No setmac/setbtmac or other eFuse programming commands were issued. Rebooted
+to restore runtime pinmux/SDIO drivers and verified phy0 and Wi-Fi scanning.
+Evidence: sibling hardware-validation/2026-11-24-wifi-uart/uart.log.
+
+- Later read-only MAC recheck after the user requested another check: Wi-Fi
+  88:1e:59:09:c3:96 and BT 88:1e:59:09:c3:98, both remain:1. Reloaded the
+  UART RAM test firmware because runtime firmware did not support getmac.
+  No eFuse writes issued in this check. Evidence: Wi-Fi UART recheck.log.
+
+## 2026-11-24 — SC3336 camera on 25.12
+
+Updated both local Codex development skills for omega4-openwrt-25.12, APK,
+config presets and the external kernel workflow. Camera sensor detection
+alone did not produce a pipeline on v0.0.16. Fixed async sensor registration
+and embedded notifier lifetime in phy-rockchip-csi2-dphy; zero initialized
+V4L2 requests in CIF/ISP/CSI2 for Linux 6.12. All four package builds passed.
+Installed backed-up module overlays on A29C and rebooted: repeated five-frame
+2304x1296 NV12 capture passes; exported image visually confirms a real scene.
+Omitted alternate mipi-rx/rkisp1 modules are unnecessary for this camera.
+Non-blocking graph-query and ISP startup warnings remain documented in
+../omega4-kernel-packages/camera-6.12-doc.md. Evidence: sibling
+hardware-validation/2026-11-24-camera. No release was published.
+
+## 2026-11-24 — v0.0.17 release preparation
+
+Build both boards with camera async binding and V4L2 initialization fixes.
+Set firmware identity to 0.0.17 / 20261124. Original Omega4 hardware remains
+unavailable; qualify exact Omega4+ release capture on A29C before publication.
