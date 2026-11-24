@@ -1,3 +1,127 @@
+# OpenWrt 25.12 — Omega4 and Omega4+ Support
+
+This repository provides **OpenWrt 25.12.6** support for the **Omega4**
+(Rockchip RV1103B) and **Omega4+** (Rockchip RV1106B with external DDR).
+It uses an external **Linux 6.12.112** kernel and Onion's board support packages.
+The default branch in all three repositories is `omega4-openwrt-25.12`.
+
+Support is under active development. Omega4+ has passed boot, sysupgrade,
+Ethernet, Wi-Fi scanning, RTC, NPU inference, hardware H.264 encoding and memory
+smoke tests. Original Omega4 builds pass, but hardware validation of this port
+is pending. Camera capture, audio and NPU dynamic frequency/thermal control
+remain unqualified. See [the port documentation](openwrt25-doc.md) for details.
+
+## Repository Scope
+
+- For **Omega4 or Omega4+ questions, issues or contributions**, open an
+  [issue](https://github.com/OnionIoT/openwrt-omega4/issues) or
+  [pull request](https://github.com/OnionIoT/openwrt-omega4/pulls) here.
+- For general OpenWrt topics, use the
+  [official OpenWrt repository](https://github.com/openwrt/openwrt).
+
+## Firmware Downloads
+
+Board-specific firmware packages are available on the
+[releases page](https://github.com/OnionIoT/openwrt-omega4/releases).
+Use the package matching your hardware; Omega4 and Omega4+ have different DDR
+initialization, boot formats and flash layouts.
+
+For an existing matching OpenWrt installation, back up settings and use its
+`sysupgrade.tar`. Normal sysupgrade preserves configuration, bootloader and
+boot environment. The ZIP's `env.img` is for initial provisioning; overwriting
+an existing environment can replace its provisioned Ethernet MAC and boot settings.
+
+OpenWrt 25.12 uses **APK instead of opkg**. No custom online APK repository is
+published for this target; use matching locally built packages, especially
+kernel modules.
+
+## Setting Up the Build Environment
+
+Install the host dependencies described in the original OpenWrt README below.
+A fresh build workspace is recommended when moving from OpenWrt 24.10.
+
+### 1. Clone the three repositories
+
+Keep the kernel, OpenWrt and support packages as sibling directories:
+
+```sh
+git clone --branch omega4-openwrt-25.12 https://github.com/OnionIoT/linux-stable.git
+git clone --branch omega4-openwrt-25.12 https://github.com/OnionIoT/omega4-kernel-packages.git
+git clone --branch omega4-openwrt-25.12 https://github.com/OnionIoT/openwrt-omega4.git
+cd openwrt-omega4
+```
+
+The kernel and OpenWrt branches build on plan44's 25.12 port, with Onion board
+support carried forward. The package repository retains Onion's drivers,
+utilities and boot packages, adapted for the newer kernel and wireless APIs.
+
+### 2. Prepare the package feeds
+
+```sh
+cp feeds.conf.default feeds.conf
+./scripts/feeds update -a
+./scripts/omega4p/prepare-feeds.sh
+./scripts/feeds install -a
+```
+
+The local `omega4ko` feed points to the sibling `omega4-kernel-packages` checkout.
+The preparation script fixes a dependency in the pinned LuCI feed.
+
+### 3. Select the board and external kernel
+
+For the original **Omega4**:
+
+```sh
+cp omega4_defconfig .config
+```
+
+For **Omega4+**, use this instead:
+
+```sh
+cp omega4p_defconfig .config
+```
+
+Set the absolute path to the external kernel tree and expand the configuration:
+
+```sh
+printf 'CONFIG_EXTERNAL_KERNEL_TREE="%s"\n' "$(realpath ../linux-stable)" >> .config
+make defconfig
+```
+
+You can also set the kernel path in `make menuconfig` under
+**Advanced configuration options (for developers) → Use external kernel tree**.
+
+### 4. Configure the boot package SDK path
+
+The matching `omega4-boot` or `omega4p-boot` package requires the reference
+Rockchip SDK. Its default location is `../../ref/1103B-SDK`, relative to the
+OpenWrt checkout. If yours is elsewhere, use `make menuconfig` to set
+`CONFIG_OMEGA4_BOOT_SDK_DIR` or `CONFIG_OMEGA4P_BOOT_SDK_DIR` respectively.
+
+These packages build SPL/U-Boot and generate the environment while retaining
+pinned vendor DDR initialization inputs. See the
+[Omega4 boot package documentation](https://github.com/OnionIoT/omega4-kernel-packages/blob/omega4-openwrt-25.12/omega4-boot/omega4-boot-doc.md)
+and [Omega4+ boot package documentation](https://github.com/OnionIoT/omega4-kernel-packages/blob/omega4-openwrt-25.12/omega4p-boot/omega4p-boot-doc.md)
+for SDK requirements and provenance.
+
+### 5. Build
+
+```sh
+make -j21
+```
+
+Adjust parallelism for your build host. Images and boot artifacts are written
+to `bin/targets/rockchip/cortexa7/`.
+
+## Acknowledgements
+
+Thanks to [@plan44](https://github.com/plan44) for the initial Rockchip porting
+work and the OpenWrt 25.12 / Linux 6.12 foundation used by this port.
+
+Original OpenWrt README.md below:
+
+---
+
 ![OpenWrt logo](include/logo.png)
 
 OpenWrt Project is a Linux operating system targeting embedded devices. Instead
