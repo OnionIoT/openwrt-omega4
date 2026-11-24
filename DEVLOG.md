@@ -171,3 +171,54 @@ unavailable; qualify exact Omega4+ release capture on A29C before publication.
   match /rom (no development overlay); two five-frame 2304x1296 NV12 capture
   tests passed and exported image was visually checked. Ethernet ping passed.
   Evidence: sibling releases/v0.0.17/a29c-uart.log and camera-preview.png.
+
+## 2026-11-24 — Speaker bring-up
+
+A29C v0.0.17 has no ALSA cards: SAI and RV1103B codec drivers are missing.
+Imported matching official SDK drivers into external Linux and adapted 6.12
+APIs; kernel compile passes. Enabled both drivers and ALSA utilities for both
+board presets. Full build in progress; no playback issued. User reported scope
+ground on a speaker terminal; requested board-GND/two-channel differential
+rewiring before enabling audio. See speaker-support-doc.md and sibling
+hardware-validation/2026-11-24-speaker for ongoing validation.
+
+- Full Omega4+ firmware build passed; ALSA tools included and sysupgrade
+  board identity checked. Candidate retained with SHA256SUMS in evidence folder.
+  Not installed while scope ground reconnection is pending.
+
+- After user confirmed scope rewiring, boot testing found missing DAI name,
+  UART-only DMA channel admission, and old CPU clock-provider semantics.
+  Fixed all three. Candidate 9384650563aac57d0b04e8fed2e959606eb466b72b4163b33395c930d83f68c0
+  boots with ALSA card 0, passes repeated finite playback and 2-second capture.
+  Camera smoke passed; env/network hashes unchanged. Speaker stays silent: scope
+  shows common-mode pickup, negligible differential tone. User confirmed amp
+  has GPIO enable; waiting for pin/polarity before adding pa-ctl-gpios.
+
+- User identified EVB LM4890S U4 enable as GPIO0_A4 active high. Added EVB
+  pa-ctl-gpios, explicit pinmux and 220 ms wake-up delay (inherited by Omega4+).
+  Manual enable first proved output. Final candidate
+  329e9cb4aa215b70532a1abf36a4b0ccdd7298019c6488ff4fadd6f1fdfe7313
+  then passed automatic low/high/low GPIO lifecycle and finite playback on A29C.
+  Scope captured opposite-phase 1 kHz signals, 0.312 Vpp differential fitted
+  amplitude, returning to noise-level output after stop. Settings/env unchanged.
+  Full evidence and measurement limitations in speaker-support-doc.md.
+
+- Microphone pickup test: simultaneous 48 kHz stereo recording and nearby
+  speaker playback recovered 700/1300/2100 Hz in order, no clipping, digital
+  loopback disabled. Mono duplex capture has half-pitch/doubled timing even
+  with Receive Mono Switch enabled; stereo is the validated workaround.
+  Some runs log Failed to idle FS at shutdown. See speaker-support-doc.md
+  and 2026-11-24-microphone evidence. No new firmware changes in this test.
+
+- Audio shutdown investigation: mixed mono capture/stereo playback reproduced
+  persistent FS non-idle (STATUS 0x6, XFER 0, CKR 0x18 on SAI 0x24031103).
+  Fresh-boot matching stereo duplex and 1000 idle clock gate cycles passed.
+  Added SAI symmetric_channels: shared FSCR/CKR cannot be reprogrammed for
+  mismatched concurrent streams. Diagnostic timeout extension/logging removed.
+  Full build passed; candidate hardware validation in progress.
+- Final audio constraint candidate 716dcfe443274a7c83d8bc083d9c4b14d32093340aa31cfbef91e2a3843e3ddd
+  installed and validated: 11 supported cases, 6 expected mismatch rejections,
+  all 17 runtime suspends, zero idle warnings. Settings/env hashes unchanged.
+  Final-image boot and reboot passed. Diagnostic-image first boot had a separate
+  timer-interrupt panic during module loading; retained unresolved in evidence
+  and speaker-support-doc.md. No commit/push/release performed.

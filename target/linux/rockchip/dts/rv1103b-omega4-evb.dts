@@ -120,3 +120,19 @@
 &rtc {
 	status = "okay";
 };
+
+/* EVB U4 LM4890: GPIO0_A4 high enables the bridge-tied speaker output. */
+&acodec {
+	pinctrl-names = "default";
+	pinctrl-0 = <&speaker_amp_enable>;
+	pa-ctl-gpios = <&gpio0 RK_PA4 GPIO_ACTIVE_HIGH>;
+	pa-ctl-delay-ms = <220>;
+};
+
+&pinctrl {
+	speaker {
+		speaker_amp_enable: speaker-amp-enable {
+			rockchip,pins = <0 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+};
