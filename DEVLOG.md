@@ -222,3 +222,24 @@ hardware-validation/2026-11-24-speaker for ongoing validation.
   Final-image boot and reboot passed. Diagnostic-image first boot had a separate
   timer-interrupt panic during module loading; retained unresolved in evidence
   and speaker-support-doc.md. No commit/push/release performed.
+
+## 2026-11-24 — panic investigation after audio commit
+
+- Committed audio work: Linux d74b526b241a, OpenWrt d253d519e1.
+- Exact failing image's kernel bytes differ from the oops instruction dump:
+  confirmed text corruption. Reinstalling that image reproduced a second panic,
+  this time in lru_add during HPMCU request_firmware, again before core reset.
+- Found HPMCU probe enables clocks while reset is deasserted and translation
+  still zero. Added reset-before-clocks and a reboot shutdown callback in the
+  package; bumped release to 3. This fixes a real startup hazard; attribution of
+  the exact corrupting writes remains inferred, not directly traced.
+- Corrected module overlay booted with original diagnostic kernel. Fresh upgrade
+  with that same kernel and corrected rootfs passed; full corrected audio image
+  also passed initial boot. Reboot loop and final checks are recorded in sibling
+  hardware-validation/2026-11-24-panic/. See packages hpmcu-startup-doc.md.
+- Full corrected candidate SHA256
+  02d437e623ac84e70132a312e2c2391cf308a6ca02bddc983d10c89951cd2b57
+  passed two more warm reboots, MCU heartbeat/mailbox checks, 96 MiB/eight-pattern
+  memory smoke and simultaneous stereo audio. No panic or idle warnings in these
+  checks; network/env hashes unchanged. The HPMCU fix has causal
+  limits documented (startup race strongly implicated, corrupting write not traced).
