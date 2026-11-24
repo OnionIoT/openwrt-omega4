@@ -251,3 +251,12 @@ duplex framing and HPMCU reset-before-clocks/shutdown fixes. Firmware identity
 0.0.18 / 20261124. Validate exact Omega4+ sysupgrade on A29C; original Omega4
 hardware remains unavailable. Prior panic attribution remains an inference
 from confirmed kernel corruption and the corrected MCU startup hazard.
+
+- Both v0.0.18 builds and bundle checks passed. Exact Omega4+ sysupgrade SHA256
+  681fcb9243e2483c9b1d16d56b3f4294bf80ee48c4c09b90690c9fcf0b9938ae
+  passed settings-preserving installation on A29C; installed kernel/rootfs
+  hashes match. Stereo audio duplex, eight 96 MiB memory patterns, HPMCU
+  heartbeat, five-frame 2304x1296 NV12 capture and Ethernet traffic passed.
+  Warm reboot stopped MCU cleanly and heartbeat resumed; no panic/audio idle
+  warnings observed. Environment/network hashes unchanged. Original Omega4
+  remains build/host-check only. Evidence: sibling releases/v0.0.18/.
