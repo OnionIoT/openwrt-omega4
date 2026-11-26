@@ -260,3 +260,32 @@ from confirmed kernel corruption and the corrected MCU startup hazard.
   Warm reboot stopped MCU cleanly and heartbeat resumed; no panic/audio idle
   warnings observed. Environment/network hashes unchanged. Original Omega4
   remains build/host-check only. Evidence: sibling releases/v0.0.18/.
+
+## 2026-11-26 — retained SDK metadata causes v0.0.18 boot panic
+
+Factory log contained 13 identical cgroup_attach_task+0x8a faults (read 0x111).
+Reproduced on A29C by adding valid SDK meta while retaining exact v0.0.18
+IDBlock/kernel/rootfs. Failsafe /dev/mem read shows 32 '#' bytes at physical
+0x64440..0x6445f overwriting the function entry. No Linux HPMCU module had loaded;
+SPL's enabled SDK metadata path signals the separate vendor boot MCU. Thus the
+previous assertion that absent Linux MCU modules ruled out MCU involvement was
+incorrect. RT-Thread's stack fill uses '#'; actual writer not instruction-traced.
+
+Fixed omega4p-boot by disabling CONFIG_ROCKCHIP_META, bumped package to release 3
+and added build verification/provenance. With valid metadata retained, changing
+only IDBlock restores boot and correct instruction bytes. MCU heartbeat,
+96 MiB/eight-pattern memory test, stereo audio and SC3336 capture passed.
+Warm/cold regression checks and delivery artifacts are recorded in sibling
+hardware-validation/2026-11-26-meta-panic. Sysupgrade alone cannot apply this
+bootloader correction. No release publication requested/performed.
+- Fixed IDBlock also passed warm and three-second-off cold boot with the valid
+  SDK meta retained. Restored A29C's original empty meta afterward, with exact
+  native readback. Prepared and validated an IDBlock-only WebUSB recovery ZIP
+  (no env/rootfs images). Separate factory board still needs confirmation.
+
+## 2026-11-26 — v0.0.19 release preparation
+
+Build both profiles with firmware identity 0.0.19 / 20261126. Include
+omega4p-boot release 3 disabling SDK metadata loading in SPL. Publish an
+IDBlock-only recovery ZIP alongside full images: sysupgrade cannot update SPL.
+Keep the factory-board retest and separate USB-reset hash stall explicit.
