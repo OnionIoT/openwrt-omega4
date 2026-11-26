@@ -289,3 +289,24 @@ Build both profiles with firmware identity 0.0.19 / 20261126. Include
 omega4p-boot release 3 disabling SDK metadata loading in SPL. Publish an
 IDBlock-only recovery ZIP alongside full images: sysupgrade cannot update SPL.
 Keep the factory-board retest and separate USB-reset hash stall explicit.
+
+### v0.0.19 release validation
+
+- Both profile builds completed successfully. Full archives passed environment
+  CRC, FIT hashes/DT identity, sysupgrade contents/metadata, firmware identity,
+  internal SHA256 and ZIP integrity checks. Restored the Omega4+ build config.
+- A29C installed the exact v0.0.19 sysupgrade, preserving configuration. Verified
+  installed kernel, squashfs and corrected IDBlock against release hashes;
+  environment and network configuration hashes remained unchanged.
+- Reset after sysupgrade stalled at SPL kernel SHA256 checking. A three-second
+  cold power cycle recovered the board. The existing reset issue therefore also
+  affects sysupgrade reset, not only USB-tool reset; release notes document it.
+- After recovery, v0.0.19 / 20261126 passed HPMCU heartbeat, 96 MiB/eight-pattern
+  memory checks, 48 kHz stereo playback/capture, audio runtime suspend/amplifier
+  shutdown, SC3336 five-frame 2304x1296 NV12 capture and Ethernet ping.
+- IDBlock-only ZIP passed web-flasher manifest/image validation and matches the
+  earlier native hardware readback. It preserves env/MAC/meta/kernel/rootfs;
+  sysupgrade alone cannot install this bootloader correction.
+- Evidence/artifacts: sibling releases/v0.0.19/. Source snapshot: OpenWrt
+  7101e9db92c9, kernel d74b526b241a, packages 951f9f4542f4. Separate factory-board
+  retest and original Omega4 hardware validation remain pending.
