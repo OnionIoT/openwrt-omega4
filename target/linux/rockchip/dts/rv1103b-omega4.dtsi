@@ -357,7 +357,8 @@
 
 			partition@a40000 {
 				label = "ubi";
-				reg = <0x00a40000 0x0f5c0000>;
+				/* Match the USB loader: leave the final 512 KiB outside UBI. */
+				reg = <0x00a40000 0x0f540000>;
 			};
 		};
 	};

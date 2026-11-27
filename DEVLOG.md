@@ -310,3 +310,39 @@ Keep the factory-board retest and separate USB-reset hash stall explicit.
 - Evidence/artifacts: sibling releases/v0.0.19/. Source snapshot: OpenWrt
   7101e9db92c9, kernel d74b526b241a, packages 951f9f4542f4. Separate factory-board
   retest and original Omega4 hardware validation remain pending.
+
+## 2026-11-27 — original Omega4 UBI partition boundary correction
+
+User's web-flash log reports 255.50 MiB capacity and erases rootfs from
+0x00a40000 for 245.25 MiB. Linux's old DT scanned through 256 MiB and found a
+stale UBI image sequence at PEB 1964 (absolute 0x0ffc0000), beyond the erased
+range. Changed original Omega4 UBI size from 0x0f5c0000 to 0x0f540000; start
+unchanged. Added target documentation. Omega4+ layout is unchanged.
+
+Full original Omega4 build passed. Extracted actual boot FIT DT confirms
+reg=<0x00a40000 0x0f540000>. Local candidate bundle metadata has the same
+boundary; internal checksums, FIT and sysupgrade validation passed. Candidate
+is in sibling releases/omega4-ubi-boundary-fix/, explicitly unpublished with
+source.patch and dirty-source provenance. Existing v0.0.19 assets are unchanged.
+Restored prior local build configuration afterward. Hardware boot validation
+on the user's original Omega4 remains pending.
+
+## 2026-11-27 — correct the environment override too
+
+User retest disproved the DT-only candidate: same PEB 1964 failure. The default
+mtdparts environment still used -(ubi); vendor U-Boot bootargs_add_partition()
+appends that map to bootargs, overriding the DT. Updated the legacy environment
+template alongside omega4-boot's actual source to 251136K(ubi). Package release 3
+verifies this layout. Full rebuild passed; fresh env CRC, finite map, embedded
+boot DT and bundle metadata all agree. New unpublished candidate is in sibling
+releases/omega4-ubi-env-fix/. Hardware retest still pending. Old environment must
+also be migrated; use fix-env-ubi.py on a backup to preserve provisioned entries.
+
+## 2026-11-27 — v0.0.20 release
+
+User confirmed that the second original Omega4 candidate, with both bounded
+DT and environment, boots successfully. This is user-reported hardware validation
+of the fix candidate, not a direct lab test of the final v0.0.20 build. Publish
+both profiles as 0.0.20 / 20261127, retaining the Omega4+ SPL metadata fix.
+Existing original Omega4 devices need the corrected environment map as well as
+the kernel DT; sysupgrade alone preserves the old environment and is insufficient.
