@@ -346,3 +346,14 @@ of the fix candidate, not a direct lab test of the final v0.0.20 build. Publish
 both profiles as 0.0.20 / 20261127, retaining the Omega4+ SPL metadata fix.
 Existing original Omega4 devices need the corrected environment map as well as
 the kernel DT; sysupgrade alone preserves the old environment and is insufficient.
+
+### v0.0.20 final artifact checks
+
+Both profile builds passed. Final bundles passed FIT/DT identity and payload
+hash checks, environment CRC, sysupgrade metadata/content/version checks and
+web-flasher validation at the real 255.5 MiB loader capacity. Original Omega4's
+final env.img matches the user-tested candidate byte-for-byte; extracted DT
+reports a40000/f540000. Omega4+ IDBlock matches the previously hardware-tested
+v0.0.19 bytes. Restored the prior Omega4+ build configuration. Evidence and
+release files are in sibling releases/v0.0.20/. Final v0.0.20 runtime tests were
+not performed; user confirmation applies to the corresponding fix candidate.
